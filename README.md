@@ -1,66 +1,49 @@
-## Foundry
+# Steps to deploy after trying out mock deployment
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
-
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+1. run deploy tokens script and get both token 0, token 1
+```
+source .env && forge script script/00_Deploy_Tokens.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY  --etherscan-api-key $ETHERSCAN_API_KEY --verify --broadcast
 ```
 
-### Test
+World coin mainnet uniswap addresses:
+(not on testnet sadge)
 
-```shell
-$ forge test
+```
+PoolManager: 0xb1860d529182ac3bc1f51fa2abd56662b7d13f33
+PositionDescriptor: 0x7da419153bd420b689f312363756d76836aeace4
+PositionManager: 0xc585e0f504613b5fbf874f21af14c65260fb41fa
+Quoter: 0x55d235b3ff2daf7c3ede0defc9521f1d6fe6c5c0
+StateView: 0x51d394718bc09297262e368c1a481217fdeb71eb
+Universal Router: 0x8ac7bee993bb44dab564ea4bc9ea67bf9eb5e743
+Permit2: 0x000000000022D473030F116dDEE9F6B43aC78BA3
 ```
 
-### Format
 
-```shell
-$ forge fmt
+
+2. deploy the hook 
+```
+source .env && forge script script/01_Deploy_Hook.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY  --etherscan-api-key $ETHERSCAN_API_KEY --verify --broadcast
 ```
 
-### Gas Snapshots
+3. get the token 0 and token 1 addresses and modify it in Basescript.sol
 
-```shell
-$ forge snapshot
+4. make sure to also add the deployed hook address in Basescript.sol
+
+5. create pool and add liquidity
+```
+source .env && forge script script/02_CreatePoolAndAddLiquidity.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY  --etherscan-api-key $ETHERSCAN_API_KEY --verify --broadcast
 ```
 
-### Anvil
-
-```shell
-$ anvil
+6. check if pool was initialised by running
+```
+source .env && forge script script/03_GetPoolId.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY  --etherscan-api-key $ETHERSCAN_API_KEY --verify --broadcast
 ```
 
-### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+7. need to figure out how to do swaps using universal router
 
-### Cast
+Mock deployments:
 
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+token 0: 0xA815F0F2853Cb3b189FE94172F824F03F24989bD
+token 1: 0x92C79A67FA30D1e42cBB3CA9401AF2952369b973
+hook: 0xe550A677bB302D43dCc9bd30Dc634cfe8369cAc0
