@@ -33,7 +33,7 @@ contract GetPoolId is BaseScript, LiquidityHelpers {
     int24 tickUpper;
     /////////////////////////////////////
 
-    function run() external {
+    function run() external returns (PoolId) {
         PoolKey memory poolKey = PoolKey({
             currency0: currency0,
             currency1: currency1,
@@ -50,5 +50,6 @@ contract GetPoolId is BaseScript, LiquidityHelpers {
         console.log("lpFee", lpFee);
 
         console.log("oracle address", ILending(address(hookContract)).oracleAddress(poolKey.toId()));
+        return poolKey.toId();
     }
 }
