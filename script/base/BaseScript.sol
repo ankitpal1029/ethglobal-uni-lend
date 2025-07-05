@@ -36,9 +36,9 @@ contract BaseScript is Script {
     int24 tickSpacing = 100;
     uint160 startingPrice = 2 ** 96; // Starting price, sqrtPriceX96; floor(sqrt(1) * 2^96)
 
-    IERC20 token0 = IERC20(0xA815F0F2853Cb3b189FE94172F824F03F24989bD);
-    IERC20 token1 = IERC20(0x92C79A67FA30D1e42cBB3CA9401AF2952369b973);
-    IHooks constant hookContract = IHooks(0xe550A677bB302D43dCc9bd30Dc634cfe8369cAc0);
+    IERC20 token0 = IERC20(0x76f14c98d2B3d4D7e09486Ca09e5BE1B4E19182a);
+    IERC20 token1 = IERC20(0xbF784Ac432D1CA21135B3ee603E11ED990D77EA4);
+    IHooks constant hookContract = IHooks(0x235877899ECd2287B073d312C02D21e7F8d09040);
     /////////////////////////////////////
 
     Currency immutable currency0;
