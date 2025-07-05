@@ -17,8 +17,8 @@ import {BaseScript} from "./base/BaseScript.sol";
 import {LiquidityHelpers} from "./base/LiquidityHelpers.sol";
 import {IStateView} from "v4-periphery/src/interfaces/IStateView.sol";
 
-interface IRandomHook {
-    function afterSwapCount(PoolId) external returns (uint256);
+interface ILending {
+    function oracleAddress(PoolId poolId) external returns (address);
 }
 
 contract GetPoolId is BaseScript, LiquidityHelpers {
@@ -49,7 +49,6 @@ contract GetPoolId is BaseScript, LiquidityHelpers {
         console.log("protocolFee", protocolFee);
         console.log("lpFee", lpFee);
 
-        uint256 count = IRandomHook(address(hookContract)).afterSwapCount(poolKey.toId());
-        console.log("after swap count:", count);
+        console.log("oracle address", ILending(address(hookContract)).oracleAddress(poolKey.toId()));
     }
 }
