@@ -24,6 +24,7 @@ import {Helpers} from "./lib/Helpers.sol";
 import {Events} from "./lib/Events.sol";
 import {BigMathMinified} from "./lib/bigMathMinified.sol";
 import {SwapParams} from "v4-core/src/types/PoolOperation.sol";
+import {ISignatureTransfer} from "universal-router/permit2/src/interfaces/ISignatureTransfer.sol";
 
 // TODO: figure out how interest calcs would work, mostly just do it lazy updates
 // if user tries to withdraw etc it will play a role
@@ -65,12 +66,14 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
         string memory _nftName,
         string memory _nftSymbol,
         uint256 _liquidationLimit,
-        uint256 _liquidationThreshold
+        uint256 _liquidationThreshold,
+        address _permit2
     ) BaseHook(_poolManager) ERC721(_nftName, _nftSymbol) {
         owner = _owner;
         poolManager = _poolManager;
         liquidationLimit = _liquidationLimit;
         liquidationThreshold = _liquidationThreshold;
+        permit2 = _permit2;
     }
 
     function getPrice(PoolId _keyId) public view returns (int256 priceX96) {
@@ -352,10 +355,18 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
         return "yangit-lend.com";
     }
 
-    function supply(uint256 _nftId, PoolKey calldata _key, uint256 _amt) external {
+    function supply(
+        ISignatureTransfer.PermitTransferFrom memory permitTransferFrom,
+        ISignatureTransfer.SignatureTransferDetails calldata transferDetails,
+        bytes calldata signature,
+        uint256 _nftId,
+        PoolKey calldata _key,
+        uint256 _amt
+    ) external {
         // check if that nftId exists if not create nft and give it to msg.sender
 
-        IERC20(Currency.unwrap(_key.currency0)).transferFrom(msg.sender, address(this), _amt);
+        permit2.permitTransferFrom(permitTransferFrom, transferDetails, msg.sender, signature);
+        // IERC20(Currency.unwrap(_key.currency0)).transferFrom(msg.sender, address(this), _amt);
 
         PoolId _keyId = _key.toId();
 
@@ -501,10 +512,18 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
 
     function withdraw() external {}
 
-    function earn(PoolKey calldata _key, uint256 _amt, address _receiver) external {
+    function earn(
+        ISignatureTransfer.PermitTransferFrom memory permitTransferFrom,
+        ISignatureTransfer.SignatureTransferDetails calldata transferDetails,
+        bytes calldata signature,
+        PoolKey calldata _key,
+        uint256 _amt,
+        address _receiver
+    ) external {
         // use _key to pull curreny1 funds
         // TODO: think about handling interest for this later need to figure out how to do interest logic on loans too
-        IERC20(Currency.unwrap(_key.currency1)).transferFrom(msg.sender, address(this), _amt);
+        // IERC20(Currency.unwrap(_key.currency1)).transferFrom(msg.sender, address(this), _amt);
+        permit2.permitTransferFrom(permitTransferFrom, transferDetails, msg.sender, signature);
 
         liquidity[_key.toId()][_receiver].deposited += _amt;
     }
