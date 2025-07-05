@@ -40,7 +40,10 @@ source .env && forge script script/03_GetPoolId.s.sol --rpc-url $RPC_URL --priva
 ```
 
 
-7. need to figure out how to do swaps using universal router
+7. set oracle for the tokens set using
+```
+forge script script/04_SetOracle.s.sol  --rpc-url $RPC_URL --private-key $PRIVATE_KEY  --etherscan-api-key $ETHERSCAN_API_KEY --verify --broadcast -vvvv
+```
 
 Mock deployments:
 
