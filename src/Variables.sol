@@ -2,6 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {PoolId} from "v4-core/src/types/PoolId.sol";
+import {ISignatureTransfer} from "universal-router/permit2/src/interfaces/ISignatureTransfer.sol";
 
 abstract contract Variables {
     struct LatestPositionData {
@@ -140,6 +141,8 @@ abstract contract Variables {
     uint256 public liquidationLimit; // max tolerated liquidation, sell full collateral default 90
     uint256 public liquidationThreshold; // TODO: start of liquidation partial sell off 80
     uint256 public initialPrice_X96 = 1 << 96;
+
+    ISignatureTransfer permit2;
 
     mapping(PoolId => address) public oracleAddress;
     mapping(PoolId => uint256) public maxDeviation; // 50% deviation = 5000

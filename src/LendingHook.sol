@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import "forge-std/console.sol";
+// import "forge-std/console.sol";
 import {IPoolManager} from "v4-periphery/lib/v4-core/src/interfaces/IPoolManager.sol";
 import {BaseHook} from "v4-periphery/src/utils/BaseHook.sol";
 import {Hooks} from "v4-core/src/libraries/Hooks.sol";
@@ -24,6 +24,7 @@ import {Helpers} from "./lib/Helpers.sol";
 import {Events} from "./lib/Events.sol";
 import {BigMathMinified} from "./lib/bigMathMinified.sol";
 import {SwapParams} from "v4-core/src/types/PoolOperation.sol";
+import {ISignatureTransfer} from "universal-router/permit2/src/interfaces/ISignatureTransfer.sol";
 
 // TODO: figure out how interest calcs would work, mostly just do it lazy updates
 // if user tries to withdraw etc it will play a role
@@ -65,12 +66,14 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
         string memory _nftName,
         string memory _nftSymbol,
         uint256 _liquidationLimit,
-        uint256 _liquidationThreshold
+        uint256 _liquidationThreshold,
+        address _permit2
     ) BaseHook(_poolManager) ERC721(_nftName, _nftSymbol) {
         owner = _owner;
         poolManager = _poolManager;
         liquidationLimit = _liquidationLimit;
         liquidationThreshold = _liquidationThreshold;
+        permit2 = ISignatureTransfer(_permit2);
     }
 
     function getPrice(PoolId _keyId) public view returns (int256 priceX96) {
@@ -183,10 +186,10 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
             int256 uniswapPriceX96 = int256((sqrtPrice ** 2) >> 96);
             int256 diff = uniswapPriceX96 - priceX96 > 0 ? uniswapPriceX96 - priceX96 : priceX96 - uniswapPriceX96;
 
-            console.log("values", (diff) * 100 / priceX96);
-            console.log("uniswapPriceX96", uniswapPriceX96);
-            console.log("priceX96", priceX96);
-            console.log("percentage diff", (diff) * 100 / priceX96);
+            // console.log("values", (diff) * 100 / priceX96);
+            // console.log("uniswapPriceX96", uniswapPriceX96);
+            // console.log("priceX96", priceX96);
+            // console.log("percentage diff", (diff) * 100 / priceX96);
 
             if ((diff) * 100 / priceX96 > int256(maxDeviation[keyId_])) {
                 // update last tick anyways since it's keeping track of history
@@ -352,10 +355,18 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
         return "yangit-lend.com";
     }
 
-    function supply(uint256 _nftId, PoolKey calldata _key, uint256 _amt) external {
+    function supply(
+        ISignatureTransfer.PermitTransferFrom memory permitTransferFrom,
+        ISignatureTransfer.SignatureTransferDetails calldata transferDetails,
+        bytes calldata signature,
+        uint256 _nftId,
+        PoolKey calldata _key,
+        uint256 _amt
+    ) external {
         // check if that nftId exists if not create nft and give it to msg.sender
 
-        IERC20(Currency.unwrap(_key.currency0)).transferFrom(msg.sender, address(this), _amt);
+        permit2.permitTransferFrom(permitTransferFrom, transferDetails, msg.sender, signature);
+        // IERC20(Currency.unwrap(_key.currency0)).transferFrom(msg.sender, address(this), _amt);
 
         PoolId _keyId = _key.toId();
 
@@ -501,10 +512,18 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
 
     function withdraw() external {}
 
-    function earn(PoolKey calldata _key, uint256 _amt, address _receiver) external {
+    function earn(
+        ISignatureTransfer.PermitTransferFrom memory permitTransferFrom,
+        ISignatureTransfer.SignatureTransferDetails calldata transferDetails,
+        bytes calldata signature,
+        PoolKey calldata _key,
+        uint256 _amt,
+        address _receiver
+    ) external {
         // use _key to pull curreny1 funds
         // TODO: think about handling interest for this later need to figure out how to do interest logic on loans too
-        IERC20(Currency.unwrap(_key.currency1)).transferFrom(msg.sender, address(this), _amt);
+        // IERC20(Currency.unwrap(_key.currency1)).transferFrom(msg.sender, address(this), _amt);
+        permit2.permitTransferFrom(permitTransferFrom, transferDetails, msg.sender, signature);
 
         liquidity[_key.toId()][_receiver].deposited += _amt;
     }
@@ -522,7 +541,7 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
         Position memory _existingPosition = positionData[_keyId][_nftId];
         VaultVariablesState memory vaultVariables_ = vaultVariables[_keyId];
 
-        console.log("debug: tick adjustment factor", vaultVariables_.tickAdjustmentFactor);
+        // console.log("debug: tick adjustment factor", vaultVariables_.tickAdjustmentFactor);
 
         if (
             tickData[_keyId][_existingPosition.userTick].isLiquidated
@@ -552,10 +571,10 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
             int256 uniswapPriceX96 = int256((sqrtPrice ** 2) >> 96);
             int256 diff = uniswapPriceX96 - priceX96 > 0 ? uniswapPriceX96 - priceX96 : priceX96 - uniswapPriceX96;
 
-            console.log("values", (diff) * 100 / priceX96);
-            console.log("oracle price", priceX96);
-            console.log("uniswap price", uniswapPriceX96);
-            console.log("maxDeviation[keyId_]", maxDeviation[keyId_]);
+            // console.log("values", (diff) * 100 / priceX96);
+            // console.log("oracle price", priceX96);
+            // console.log("uniswap price", uniswapPriceX96);
+            // console.log("maxDeviation[keyId_]", maxDeviation[keyId_]);
 
             if ((diff) * 100 / priceX96 > int256(maxDeviation[keyId_])) {
                 // if deviation breached return
