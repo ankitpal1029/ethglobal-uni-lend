@@ -25,7 +25,8 @@ contract DeployHookScript is BaseScript {
             "Yangit Lend",
             "YL",
             90,
-            80
+            80,
+            address(permit2)
         );
         (address hookAddress, bytes32 salt) =
             HookMiner.find(CREATE2_FACTORY, flags, type(LendingHook).creationCode, constructorArgs);
@@ -38,7 +39,8 @@ contract DeployHookScript is BaseScript {
             "Yangit Lend",
             "YL",
             90,
-            80
+            80,
+            address(permit2)
         );
         vm.stopBroadcast();
         console.log("lendingHook", address(lendingHook));

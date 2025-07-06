@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import "forge-std/console.sol";
+// import "forge-std/console.sol";
 import {IPoolManager} from "v4-periphery/lib/v4-core/src/interfaces/IPoolManager.sol";
 import {BaseHook} from "v4-periphery/src/utils/BaseHook.sol";
 import {Hooks} from "v4-core/src/libraries/Hooks.sol";
@@ -73,7 +73,7 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
         poolManager = _poolManager;
         liquidationLimit = _liquidationLimit;
         liquidationThreshold = _liquidationThreshold;
-        permit2 = _permit2;
+        permit2 = ISignatureTransfer(_permit2);
     }
 
     function getPrice(PoolId _keyId) public view returns (int256 priceX96) {
@@ -186,10 +186,10 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
             int256 uniswapPriceX96 = int256((sqrtPrice ** 2) >> 96);
             int256 diff = uniswapPriceX96 - priceX96 > 0 ? uniswapPriceX96 - priceX96 : priceX96 - uniswapPriceX96;
 
-            console.log("values", (diff) * 100 / priceX96);
-            console.log("uniswapPriceX96", uniswapPriceX96);
-            console.log("priceX96", priceX96);
-            console.log("percentage diff", (diff) * 100 / priceX96);
+            // console.log("values", (diff) * 100 / priceX96);
+            // console.log("uniswapPriceX96", uniswapPriceX96);
+            // console.log("priceX96", priceX96);
+            // console.log("percentage diff", (diff) * 100 / priceX96);
 
             if ((diff) * 100 / priceX96 > int256(maxDeviation[keyId_])) {
                 // update last tick anyways since it's keeping track of history
@@ -541,7 +541,7 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
         Position memory _existingPosition = positionData[_keyId][_nftId];
         VaultVariablesState memory vaultVariables_ = vaultVariables[_keyId];
 
-        console.log("debug: tick adjustment factor", vaultVariables_.tickAdjustmentFactor);
+        // console.log("debug: tick adjustment factor", vaultVariables_.tickAdjustmentFactor);
 
         if (
             tickData[_keyId][_existingPosition.userTick].isLiquidated
@@ -571,10 +571,10 @@ contract LendingHook is BaseHook, ILending, ERC721, Variables, Helpers, Events {
             int256 uniswapPriceX96 = int256((sqrtPrice ** 2) >> 96);
             int256 diff = uniswapPriceX96 - priceX96 > 0 ? uniswapPriceX96 - priceX96 : priceX96 - uniswapPriceX96;
 
-            console.log("values", (diff) * 100 / priceX96);
-            console.log("oracle price", priceX96);
-            console.log("uniswap price", uniswapPriceX96);
-            console.log("maxDeviation[keyId_]", maxDeviation[keyId_]);
+            // console.log("values", (diff) * 100 / priceX96);
+            // console.log("oracle price", priceX96);
+            // console.log("uniswap price", uniswapPriceX96);
+            // console.log("maxDeviation[keyId_]", maxDeviation[keyId_]);
 
             if ((diff) * 100 / priceX96 > int256(maxDeviation[keyId_])) {
                 // if deviation breached return

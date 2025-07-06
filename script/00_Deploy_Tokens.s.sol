@@ -10,9 +10,9 @@ contract DeployHookScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        MockERC20 token0 = new MockERC20("Yangit", "YGT", 1000000000e18);
+        MockERC20 token0 = new MockERC20("Token A Last", "TKN A", 1000e18);
 
-        MockERC20 token1 = new MockERC20("Token2", "T2", 1000000000e18);
+        MockERC20 token1 = new MockERC20("Token B Last", "TKN B", 1000e18);
 
         vm.stopBroadcast();
         console.log("token0:", address(token0));
